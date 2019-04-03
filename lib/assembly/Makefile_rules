@@ -12,22 +12,22 @@ JEMALLOC_VERSION ?= 3.6.0
 JEMALLOC_PATH ?= $(shell pwd)/../jemalloc/$(JEMALLOC_VERSION)
 JEMALLOC_CFLAGS := -I$(JEMALLOC_PATH)/include -DJEMALLOC_HOOKS
 JEMALLOC_LIB := $(JEMALLOC_PATH)/lib
-JEMALLOC := -L$(JEMALLOC_LIB) -Wl,-rpath,$(JEMALLOC_LIB) -ljemalloc
+JEMALLOC := -L$(JEMALLOC_LIB) -Wl,-rpath,$(JEMALLOC_LIB) -ljemalloc -L lib/
 # for htslib
 HTSLIB_VERSION ?= 1.9
 HTSLIB_PATH ?= $(shell pwd)/../htslib/$(HTSLIB_VERSION)
 HTSLIB_CFLAGS := -I$(HTSLIB_PATH)/include
 HTSLIB_LIB := $(HTSLIB_PATH)/lib
-HTSLIB := -L$(HTSLIB_LIB) -Wl,-rpath,$(HTSLIB_LIB) -lhts
+HTSLIB := -L$(HTSLIB_LIB) -Wl,-rpath,$(HTSLIB_LIB) -lhts -L lib/
 
 OMP := -lgomp
 PTHREAD := -lpthread
 X11 := -lX11
-ZLIB := -lz
+ZLIB := -lz -L lib/
 
 # Pieces of how to build things.
 CC := g++
-CFLAGS := -std=c++11 -Wextra -Wall -Wsign-promo -Woverloaded-virtual -Wendif-labels -Isrc/ $(JEMALLOC_CFLAGS) $(HTSLIB_CFLAGS)
+CFLAGS := -std=c++11 -Wextra -Wall -Wsign-promo -Woverloaded-virtual -Wendif-labels -Isrc/ $(JEMALLOC_CFLAGS) $(HTSLIB_CFLAGS) -L lib/
 
 GIT_COMMIT := $(shell git rev-parse --short HEAD 2>/dev/null || echo "unknown hash")$(shell git diff-index --quiet HEAD || echo "M")
 GIT_RELEASE := $(shell git describe --tags --dirty || echo "unknown tag" )
