@@ -58,8 +58,10 @@ fi
 
 
 
-THREADS=$(expr $(nproc)  /2)
-BUCKETS=$(expr $THREADS \* 2 / 3)
+THREADS=40
+#$(expr $(nproc)  /2)
+BUCKETS=30
+#$(expr $THREADS \* 2 / 3)
 MEM=640
 
 while [[ $# -gt 0 ]]
@@ -91,6 +93,8 @@ case $key in
     ;;
 esac
 done
+
+BUCKETS=`expr $THREADS \* 2 / 3`
 
 #echo $INPUT1
 #echo $INPUT2

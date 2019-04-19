@@ -33,6 +33,8 @@ and if you have ONT reads, run
 ./runall_ont.sh -i read1.fq read2.fq ont.fq -o output.fasta [-t number_of_threads]
 ```
 
+Before SuperPlus pipeline, you need to split barcodes for stLFR reads. You can run Split_SingleTube_reads.pl under ./split_barcode/.
+
 There are three steps to the pipeline:
 
 1. Run Supernova to generate initial scaffolds.
