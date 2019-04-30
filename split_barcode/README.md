@@ -1,7 +1,7 @@
-# Split_SingleTube_reads.pl
+#run_split_unsort_filter.sh
 
-Split barcode for stLFR reads.
+Split barcode and filter for stLFR reads.
 
-Usage: perl Split_SingleTube_reads.pl barcode.list barcode_RC.list read_1.fq.gz read_2.fq.gz readLength outputprefix
+You need to change Reads1 Reads2 and Output.
 
-Example: perl Split_SingleTube_reads.pl barcode.list barcode_RC.list read_1.fq.gz read_2.fq.gz 100 split_read
+

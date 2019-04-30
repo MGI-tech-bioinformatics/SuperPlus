@@ -91,5 +91,8 @@ clean:
 	rm -rf $(LIBHTSLIB_VERSIONED)
 	rm -rf $(LIBHTSLIB_CONF)
 	make -C $(LIBASSEMBLY) cleanAll
+	make -C $(LIBJEMALLOC_BUILD) clean
+	make -C $(LIBHTSLIB_BUILD) clean
+	make -C gap_closer clean
 
 
