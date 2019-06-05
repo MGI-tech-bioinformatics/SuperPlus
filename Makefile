@@ -11,6 +11,7 @@ LIBPY=lib/python
 LIBGO=$(shell pwd)/lib/go
 LIBGO_BINS=reads/bucket_fastq_by_bc reads/sort_fastq_by_bc
 export GOPATH=$(shell pwd)/lib/go:$(shell pwd)/tenkit/lib/go
+export LIBRARY_PATH=$(shell pwd)/lib/assembly/lib:$LIBRARY_PATH
 
 LIBASSEMBLY=$(shell pwd)/lib/assembly
 LIBASSEMBLY_BINS=CP DF ParseBarcodedFastqs FastFastbCount MakeFasta ReScaffold
