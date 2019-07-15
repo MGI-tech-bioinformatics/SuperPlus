@@ -58,10 +58,8 @@ fi
 
 
 
-THREADS=40
-#$(expr $(nproc)  /2)
-BUCKETS=30
-#$(expr $THREADS \* 2 / 3)
+THREADS=$(expr $(nproc)  /2)
+BUCKETS=$(expr $THREADS \* 2 / 3)
 MEM=640
 
 while [[ $# -gt 0 ]]
@@ -93,8 +91,6 @@ case $key in
     ;;
 esac
 done
-
-BUCKETS=`expr $THREADS \* 2 / 3`
 
 #echo $INPUT1
 #echo $INPUT2
@@ -151,13 +147,15 @@ $BINDIR/ReScaffold FASTA_IN=$TMPPATH/original_underscore.fasta BAM_IN=$TMPPATH/o
 
 zcat $TMPPATH/original_rescaff.fa.gz > $TMPPATH/original_rescaff.fa
 
-zcat $INPUT1 > $TMPPATH/read1.fq
+#zcat $INPUT1 > $TMPPATH/read1.fq
 
-zcat $INPUT2 > $TMPPATH/read2.fq
+#zcat $INPUT2 > $TMPPATH/read2.fq
 
 zcat $INPUT3 > $TMPPATH/ont.fq
 
-$BINDIR/gc $TMPPATH/original_rescaff.fa $TMPPATH/ont.fq $THREADS $TMPPATH/read1.fq $TMPPATH/read2.fq $OUTPUT
+$BINDIR/gc $TMPPATH/original_rescaff.fa $TMPPATH/ont.fq $THREADS $OUTPUT
+
+mv gc_fix1.fa ${OUTPUT}.fasta
 
 date
 echo

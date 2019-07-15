@@ -14,7 +14,7 @@ export GOPATH=$(shell pwd)/lib/go:$(shell pwd)/tenkit/lib/go
 export LIBRARY_PATH=$(shell pwd)/lib/assembly/lib:$LIBRARY_PATH
 
 LIBASSEMBLY=$(shell pwd)/lib/assembly
-LIBASSEMBLY_BINS=CP DF ParseBarcodedFastqs FastFastbCount MakeFasta ReScaffold
+LIBASSEMBLY_BINS=CP DF ParseBarcodedFastqs FastFastbCount MakeFasta ReScaffold_diploid ReScaffold
 
 LIBJEMALLOC=$(shell pwd)/lib/jemalloc
 LIBJEMALLOC_BUILD=$(LIBJEMALLOC)/build

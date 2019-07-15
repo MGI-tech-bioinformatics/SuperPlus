@@ -705,7 +705,7 @@ fix_ont1 (mp_t(okseq) * okseqs, ctg_graph_t * g,
 		sf = mp_at (sf, scafs, i);
 		n_ctgs = mp_cnt (sf->ctg_ids);
 
-    fprintf (fp, "> %d\n", n_scaf++);
+    fprintf (fp, ">%d\n", n_scaf++);
     acu_len = 0;
 
     contig_seq_dump (fp, mp_at(ctg,ctg_seqs,sf->ctg_ids->arr[0]), NULL, &acu_len);

@@ -435,7 +435,7 @@ namespace dr_wu {
 				{
 					total_matrix.push_back(tmp);
 				}
-			//	std::cerr << scaff_list[i / 2] << "\t" << i % 2 + 1 << "\t" << scaff_list[j / 2] << "\t" << j % 2 + 1 << "\t" << intersection_size(bcs1, bcs2) << "\t" << jac << std::endl;
+				//std::cerr << scaff_list[i / 2] << "\t" << i % 2 + 1 << "\t" << scaff_list[j / 2] << "\t" << j % 2 + 1 << "\t" << intersection_size(bcs1, bcs2) << "\t" << jac << std::endl;
 			}
 		}
 
@@ -729,12 +729,12 @@ void ParseFasta(const String &fasta_input,
 
 	// check if lengths are the same as in bam
 	ForceAssertEq(original_scaffolds.size(), scaffold_lens.size());
-	for (int i = 0; i < original_scaffolds.isize(); ++i) {
+	/*for (int i = 0; i < original_scaffolds.isize(); ++i) {
 		if (original_scaffolds[i].isize() != scaffold_lens[i]) {
 			std::cerr << Date() << ": #" << i << " scaffold's length not correct"
 				<< std::endl;
 		}
-	}
+	}*/
 	// check if names are the same as in bam
 	ForceAssertEq(scaffold_names_from_fasta.size(), scaffold_names.size());
 	for (int i = 0; i < scaffold_names_from_fasta.isize(); ++i) {
@@ -745,6 +745,83 @@ void ParseFasta(const String &fasta_input,
 				<< scaffold_names[i] << std::endl;
 		}
 	}
+	std::cerr << Date() << ": scaffolds cnt = " << original_scaffolds.size()
+		<< std::endl;
+	std::cerr << Date() << ": end of parsing fasta file" << std::endl;
+}
+
+void ParseFastaWithoutCheck(const String &fasta_input,
+	vec<String> &original_scaffolds,
+	//vec<int> &scaffold_lens,
+	vec<String> &scaffold_names)
+{
+
+	std::cerr << Date() << ": start to parse fasta file" << std::endl;
+	String command;
+	if (fasta_input.EndsWith(".gz")) {
+		command = "zcat " + fasta_input;
+	}
+	else {
+		command = "cat " + fasta_input;
+	}
+	scaffold_names.clear();
+	//scaffold_lens.clear();
+	//vec<String> scaffold_names_from_fasta;
+	fast_pipe_ifstream input(command);
+	String buf;
+	buf.reserve(1024 * 1024);
+	String scaffold;
+	scaffold.reserve(1024 * 1024 * 1024);
+	size_t line = 0;
+	while (1) {
+		getline(input, buf);
+		if (input.fail()) break;
+		line++;
+		// first or next seq
+
+		if (buf.empty()) {
+			continue;
+		}
+		if (buf.StartsWith(">")) {
+			buf = buf.SafeAfter(">");
+			buf = buf.SafeBefore(" ");
+			scaffold_names.push_back(buf);
+			if (scaffold.empty()) {
+				continue;
+			}
+			// push current scaffold into vec
+			original_scaffolds.push_back(scaffold);
+			scaffold.clear();
+		}
+		else {
+			scaffold += buf;
+		}
+
+	}
+	// deal with last scaffold
+	if (!scaffold.empty()) {
+		original_scaffolds.push_back(scaffold);
+		scaffold.clear();
+	}
+
+	// check if lengths are the same as in bam
+	//ForceAssertEq(original_scaffolds.size(), scaffold_lens.size());
+	/*for (int i = 0; i < original_scaffolds.isize(); ++i) {
+		if (original_scaffolds[i].isize() != scaffold_lens[i]) {
+			std::cerr << Date() << ": #" << i << " scaffold's length not correct"
+				<< std::endl;
+		}
+	}*/
+	// check if names are the same as in bam
+	//ForceAssertEq(scaffold_names_from_fasta.size(), scaffold_names.size());
+	/*for (int i = 0; i < scaffold_names_from_fasta.isize(); ++i) {
+		if (scaffold_names_from_fasta[i] != scaffold_names[i]) {
+			std::cerr << Date() << ": #" << i << " scaffold's name not correct"
+				<< std::endl;
+			std::cerr << Date() << scaffold_names_from_fasta[i] << ": "
+				<< scaffold_names[i] << std::endl;
+		}
+	}*/
 	std::cerr << Date() << ": scaffolds cnt = " << original_scaffolds.size()
 		<< std::endl;
 	std::cerr << Date() << ": end of parsing fasta file" << std::endl;
@@ -1520,6 +1597,120 @@ void OutputLinkedScaffold(const String &fasta_out,
 	if (ZIP) TXT2GZ(fasta_out);
 }
 
+template<class T>
+int linear_find(const vec<T>& v, const T& b)
+{
+	//Bool verbose = True;
+	//int f = -1;
+	for (int i = 0; i < v.isize(); i++)
+	{
+		if (v[i] == b)
+		{
+			//cout<<
+			return i;
+		}
+	}
+	return -1;
+}
+
+void OutputLinkedScaffoldx(const String &fasta_out,
+	const vec<vec<int> > &linked_scaffolds,
+	const vec<String> &scaffold_names,
+	const vec<String> &scaffold_names1,
+	vec<String> &original_scaffolds,
+	vec<String> &original_scaffolds1,
+	const vec<vec<int> > &bc_gap_distances,
+	Bool ZIP) {
+	std::ofstream f_out;
+	f_out.open(fasta_out.c_str(), std::ofstream::out);
+	if (!f_out.is_open()) {
+		std::cerr << Date() << ": can't open output fasta file" << std::endl;
+		Scram(1);
+	}
+	String seq;
+	seq.reserve(1024 * 1024 * 1024);
+	Bool verbose = False;
+	int idx;
+	for (int i = 0; i < linked_scaffolds.isize(); ++i) {
+		const vec<int> & linked_scaffold = linked_scaffolds[i];
+		const vec<int> & bc_gap_distance = bc_gap_distances[i];
+		f_out << '>' << i << ' ';
+		if (linked_scaffold.solo()) {
+			int id = linked_scaffold.front();
+			idx = linear_find(scaffold_names1, scaffold_names[id / 2]);
+			f_out << scaffold_names[id / 2] << std::endl;
+			// no rc case
+			if (verbose) { cout << id / 2 << "\t" << idx << endl; }
+			if (idx >= 0)
+			{
+				OutoutSeq(f_out, original_scaffolds1[idx]);
+			}
+			else
+			{
+				OutoutSeq(f_out, original_scaffolds[id / 2]);
+			}
+			continue;
+		}
+		int id = linked_scaffold.front();
+		idx = linear_find(scaffold_names1, scaffold_names[id / 2]);
+		if (verbose) { cout << id / 2 << "\t" << idx << endl; }
+		f_out << scaffold_names[id / 2];
+		if (idx >= 0)
+		{
+			if (id % 2 != 0) {
+				seq.append(ReverseComplementSeq(original_scaffolds1[idx]));
+			}
+			else {
+				seq.append(original_scaffolds1[idx]);
+			}
+		}
+		else 
+		{
+			if (id % 2 != 0) {
+				seq.append(ReverseComplementSeq(original_scaffolds[id / 2]));
+			}
+			else {
+				seq.append(original_scaffolds[id / 2]);
+			}
+		}
+		for (int j = 1; j < linked_scaffold.isize(); ++j) {
+			int gap_cnt = bc_gap_distance[j - 1];
+			ForceAssertNe(gap_cnt, -1);
+			seq.append(gap_cnt, 'N');
+			id = linked_scaffold[j];
+			f_out << " + " << gap_cnt << " N + " << scaffold_names[id / 2];
+			idx = linear_find(scaffold_names1, scaffold_names[id / 2]);
+			//if()
+			if (verbose) { cout << id / 2 << "\t" << idx << endl; }
+			//f_out << scaffold_names[id / 2];
+			if (idx >= 0)
+			{
+				if (id % 2 != 0) {
+					seq.append(ReverseComplementSeq(original_scaffolds1[idx]));
+				}
+				else {
+					seq.append(original_scaffolds1[idx]);
+				}
+			}
+			else
+			{
+				if (id % 2 != 0) {
+					seq.append(ReverseComplementSeq(original_scaffolds[id / 2]));
+				}
+				else {
+					seq.append(original_scaffolds[id / 2]);
+				}
+			}
+		}
+		f_out << std::endl;
+		OutoutSeq(f_out, seq);
+		seq.clear();
+	}
+	f_out.close();
+	if (ZIP) TXT2GZ(fasta_out);
+}
+
+
 int main(int argc, char **argv) {
 
 	RunTime();
@@ -1565,23 +1756,26 @@ int main(int argc, char **argv) {
 	// parse all kinds of input
 	vec<vec<pair<int, int> > > lbps;
 	vec<int> scaffold_lens;
-	vec<String> scaffold_names;
-	int window=20000;
+	vec<String> scaffold_names, scaffold_names1, scaffold_names2;
+	int window = 20000;
 	if (LWML_IN != "")
 	{
 		BinaryReader::readFile(LWML_IN.c_str(), &window);
-		window/=4;
+		window /= 4;
 	}
-	
 
-//	window /= 4;
+
+	//window /= 4;
 	//cout << window << endl;
 	// ParseBAM(BAM_IN.c_str(), lbps, scaffold_lens, scaffold_names);
 	ParallelParseBAM(BAM_IN.c_str(), lbps, scaffold_lens, scaffold_names,
 		NUM_THREADS);
 
-	vec<String> original_scaffolds;
-	ParseFasta(FASTA_IN, original_scaffolds, scaffold_lens, scaffold_names);
+	vec<String> original_scaffolds, original_scaffolds1, original_scaffolds2;
+	//ParseFasta(FASTA_IN + ".fasta", original_scaffolds, scaffold_lens, scaffold_names);
+	ParseFastaWithoutCheck(FASTA_IN + ".fasta", original_scaffolds, scaffold_names);
+	ParseFastaWithoutCheck(FASTA_IN + ".1.fasta", original_scaffolds1, scaffold_names1);
+	ParseFastaWithoutCheck(FASTA_IN + ".2.fasta", original_scaffolds2, scaffold_names2);
 
 	vec<vec<pair<int, int> > > gap_areas;
 	GetGapArea(original_scaffolds, gap_areas, MIN_GAP);
@@ -1593,15 +1787,26 @@ int main(int argc, char **argv) {
 	dr_wu::linear_scaffolding(lbps, scaffold_lens, gap_areas, non_dup, scaffold_names, linked_scaffolds, window);
 
 	vec<vec<int> > bc_gap_distances;
-	int VERBOSITY = 1;
+	int VERBOSITY = 0;
 	GaprikaExternal(linked_scaffolds, gap_areas, scaffold_lens, lbps,
 		bc_gap_distances, EST_ROUND, MAX_GAP, VERBOSITY, window);
 
 
-	OutputLinkedScaffold(FASTA_OUT,
+	OutputLinkedScaffoldx(FASTA_OUT + "1.fasta",
 		linked_scaffolds,
 		scaffold_names,
+		scaffold_names1, 
 		original_scaffolds,
+		original_scaffolds1,
+		bc_gap_distances,
+		ZIP);
+
+	OutputLinkedScaffoldx(FASTA_OUT + "2.fasta",
+		linked_scaffolds,
+		scaffold_names,
+		scaffold_names2,
+		original_scaffolds,
+		original_scaffolds2,
 		bc_gap_distances,
 		ZIP);
 

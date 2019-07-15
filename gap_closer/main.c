@@ -119,9 +119,9 @@ gap_closer_info_free (gc_info_t * gc_info, int n_thread)
 int
 main (int argc, char * argv[])
 {
-  if (argc < 7) {
+  if (argc < 5) {
     fprintf (stderr, "Incomplete input!\n");
-    fprintf (stderr, "usage: gc <scaff> <ont> <number of thread> <lfr.fq1> <lfr.fq2> <output prefix>\n");
+    fprintf (stderr, "usage: gc <scaff> <ont> <number of thread> <output prefix>\n");
     return 1;
   }
 
@@ -137,12 +137,12 @@ main (int argc, char * argv[])
 
   time (&time_beg);
 
-	n_thread = atoi (argv[3]);
   scaff_file = argv[1];
   ont_file = argv[2];
-  lfr_fq_file[0] = argv[4];
-  lfr_fq_file[1] = argv[5];
-  prefix = argv[6];
+  n_thread = atoi (argv[3]);
+  //lfr_fq_file[0] = argv[4];
+  //lfr_fq_file[1] = argv[5];
+  prefix = argv[4];
 
   hash_func_init ();
 

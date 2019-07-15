@@ -263,8 +263,8 @@ configure:4374: gcc -o conftest  -Wall -g -O2   conftest.c  >&5
 conftest.c:36:6: warning: conflicting types for built-in function 'log' [enabled by default]
  char log ();
       ^
-/tmp/ccxMOzya.o: In function `main':
-/home/huangweihua/MegaBOLT/SuperPlus/SuperPlus/lib/htslib/build/conftest.c:40: undefined reference to `log'
+/tmp/cc2p3YHs.o: In function `main':
+/mnt/sda/huangweihua/MegaBOLT/SuperPlus/SuperPlus/lib/htslib/build/conftest.c:40: undefined reference to `log'
 collect2: error: ld returned 1 exit status
 configure:4374: $? = 1
 configure: failed program was:

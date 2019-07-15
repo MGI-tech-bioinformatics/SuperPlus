@@ -58,8 +58,10 @@ fi
 
 
 
-THREADS=$(expr $(nproc)  /2)
-BUCKETS=$(expr $THREADS \* 2 / 3)
+THREADS=40
+#$(expr $(nproc)  /2)
+BUCKETS=30
+#$(expr $THREADS \* 2 / 3)
 MEM=640
 
 while [[ $# -gt 0 ]]
@@ -90,6 +92,8 @@ case $key in
 esac
 done
 
+BUCKETS=`expr $THREADS \* 2 / 3`
+
 #echo $INPUT1
 #echo $INPUT2
 #echo $OUTPUT
@@ -97,25 +101,25 @@ done
 
 if [ "$TMPPATH" = "" ]; then 
 	echo "Error! no temp path!"
-	echo "Usage: ./runall.sh -i read1.fq read2.fq -o output.fasta [-t number_of_threads]"
+	echo "Usage: ./runall_diploid.sh -i read1.fq read2.fq -o output.fasta [-t number_of_threads]"
 	exit
 fi
 
 if [ ! -e "$INPUT1" ]; then
         echo "Error! read1 fastq file not exist!"
-	echo "Usage: ./runall.sh -i read1.fq read2.fq -o output.fasta [-t number_of_threads]"
+	echo "Usage: ./runall_diploid.sh -i read1.fq read2.fq -o output.fasta [-t number_of_threads]"
 	exit
 fi
 
 if [ ! -e "$INPUT2" ]; then
         echo "Error! read2 fastq file not exist!"
-	echo "Usage: ./runall.sh -i read1.fq read2.fq -o output.fasta [-t number_of_threads]"
+	echo "Usage: ./runall_diploid.sh -i read1.fq read2.fq -o output.fasta [-t number_of_threads]"
         exit
 fi
 
 if [ -e "$OUTPUT" ]; then
         echo "Error! output file already exist!"
-	echo "Usage: ./runall.sh -i read1.fq read2.fq -o output.fasta [-t number_of_threads]"
+	echo "Usage: ./runall_diploid.sh -i read1.fq read2.fq -o output.fasta [-t number_of_threads]"
         exit
 fi
 
@@ -129,7 +133,13 @@ $BINDIR/CP DIR=$TMPPATH/GapToy/1/a.base NUM_THREADS=$THREADS MAX_MEM_GB=$MEM
 
 $BINDIR/MakeFasta DIR=$TMPPATH/GapToy/1/a.base/final FLAVOR=pseudohap OUT_HEAD=$TMPPATH/original
 
-zcat $TMPPATH/original.fasta.gz | sed -e "s/ /_/g" >$TMPPATH/original_underscore.fasta
+$BINDIR/MakeFasta DIR=$TMPPATH/GapToy/1/a.base/final FLAVOR=pseudohap2 OUT_HEAD=$TMPPATH/original
+
+zcat $TMPPATH/original.fasta.gz | sed -e "s/ style=3//g" | sed -e "s/ /_/g" >$TMPPATH/original_underscore.fasta
+
+zcat $TMPPATH/original.1.fasta.gz | sed -e "s/ style=4//g" | sed -e "s/ /_/g" >$TMPPATH/original_underscore.1.fasta
+
+zcat $TMPPATH/original.2.fasta.gz | sed -e "s/ style=4//g" | sed -e "s/ /_/g" >$TMPPATH/original_underscore.2.fasta
 
 $BWA index $TMPPATH/original_underscore.fasta
 
@@ -141,7 +151,7 @@ $BAMMDP I=$TMPPATH/original_sort.bam O=$TMPPATH/original_sort_mdp.bam markthread
 
 $MINIMAP -x asm10 $TMPPATH/original_underscore.fasta $TMPPATH/original_underscore.fasta > $TMPPATH/overlap.paf
 
-$BINDIR/ReScaffold FASTA_IN=$TMPPATH/original_underscore.fasta BAM_IN=$TMPPATH/original_sort_mdp.bam PAF_IN=$TMPPATH/overlap.paf LWML_IN=$TMPPATH/GapToy/1/a.base/records/lwml FASTA_OUT=$OUTPUT
+$BINDIR/ReScaffold_diploid FASTA_IN=$TMPPATH/original_underscore BAM_IN=$TMPPATH/original_sort_mdp.bam PAF_IN=$TMPPATH/overlap.paf LWML_IN=$TMPPATH/GapToy/1/a.base/records/lwml FASTA_OUT=$OUTPUT
 
 date
 echo
