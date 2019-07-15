@@ -4,10 +4,10 @@
 
 ### Dependencies:
 
-* SOAPfilter_v2.2
+* SOAPfilter_v2.2(already in ./split_barcode/ directory)
 * gcc (tested on version 4.8.5)
 * bwa
-* biobambam
+* biobambam(bammarkduplicates and bamsort)
 * samtools
 * minimap2
 
@@ -23,12 +23,14 @@ For configuring, put bwa, biobambam, samtools and minimap2 in ./bin/ or system p
 
 ### Quick Guide:
 
-Before SuperPlus pipeline, you need to split barcodes, filter duplicate and adpater for stLFR reads. You can run run_split_unsort_filter.sh under ./split_barcode/. And you need to change Read1 Read2 and Output.
+Before SuperPlus pipeline, you need to split barcodes, filter duplicate and adpater for stLFR reads. You can run run_split_unsort_filter.sh under ./split_barcode/. And you need to change program directory, Read1, Read2 and Output.
 ```
 sh ./run_split_unsort_filter.sh
 ```
 
 The SuperPlus pipeline requires two stLFR read file and an optional ONT read file, all formatted in fastq. runall.sh and runall_ont.sh are two scripts for running pipeline.
+
+* Need to change directory for program.
 
 For monoploid:
 

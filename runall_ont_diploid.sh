@@ -58,10 +58,8 @@ fi
 
 
 
-THREADS=40
-#$(expr $(nproc)  /2)
-BUCKETS=30
-#$(expr $THREADS \* 2 / 3)
+THREADS=$( expr $( nproc )  / 2 )
+BUCKETS=$( expr $THREADS \* 2 / 3 )
 MEM=640
 
 while [[ $# -gt 0 ]]
@@ -94,7 +92,7 @@ case $key in
 esac
 done
 
-BUCKETS=`expr $THREADS \* 2 / 3`
+BUCKETS=$( expr $THREADS \* 2 / 3 )
 
 #echo $INPUT1
 #echo $INPUT2
@@ -145,7 +143,7 @@ zcat $TMPPATH/original.2.fasta.gz | sed -e "s/ style=4//g" | sed -e "s/ /_/g" >$
 
 $BWA index $TMPPATH/original_underscore.fasta
 
-$BWA mem -t $THREADS $TMPPATH/original_underscore.fasta $INPUT1 $INPUT2 | $SAMTOOLS view -Sb > $TMPPATH/original.bam
+$BWA mem -t $THREADS $TMPPATH/original_underscore.fasta $INPUT1 $INPUT2 | $SAMTOOLS view -Sb - > $TMPPATH/original.bam
 
 $BAMSORT I=$TMPPATH/original.bam O=$TMPPATH/original_sort.bam blockmb=$( expr 1024 \* $MEM ) sortthreads=$THREADS
 
